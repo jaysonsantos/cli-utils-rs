@@ -55,24 +55,27 @@ fn main() -> Result<(), failure::Error> {
     Ok(())
 }
 
-fn skip_lines<R, W>(
+/// Read from input and write to output skipping lines within a range.
+/// This is generic function and does not know about the aspects of a file and if it has to
+/// sync the file.
+pub fn skip_lines<R, W>(
     lines_to_skip: RangeInclusive<usize>,
-    from: R,
-    to: &mut W,
+    input: R,
+    output: &mut W,
 ) -> Result<(), failure::Error>
 where
     R: Read,
     W: Write,
 {
-    for (line_number, line) in BufReader::new(from).lines().enumerate() {
+    for (line_number, line) in BufReader::new(input).lines().enumerate() {
         let line_to_skip = line_number + 1;
         if lines_to_skip.contains(&line_to_skip) {
             debug!("Skipping {}", line_to_skip);
             continue;
         }
         trace!("Including {}", line_to_skip);
-        to.write_all(line?.as_bytes())?;
-        to.write_all(&LINE_ENDING[..])?;
+        output.write_all(line?.as_bytes())?;
+        output.write_all(&LINE_ENDING[..])?;
     }
     Ok(())
 }

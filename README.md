@@ -18,3 +18,6 @@ ARGS:
     <file>           
     <line_number>    Line number (1) or range (1-10)
 ```
+### delete-local-branches
+[delete-local-branches](src/delete_local_branches.rs) delete all local branches except current active branch in order to
+declutter
