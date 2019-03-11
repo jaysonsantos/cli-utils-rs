@@ -1,0 +1,16 @@
+[package]
+name = "jaysons-cli-utils"
+version = "0.1.0"
+authors = ["Jayson Reis <santosdosreis@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+failure = "0.1.5"
+clap = "2.32.0"
+env_logger = "0.6.1"
+log = "0.4.6"
+
+
+[[bin]]
+name = "delete-line"
+path = "src/delete_line.rs"
