@@ -1,17 +1,30 @@
-use env_logger::Builder;
-use git2::{BranchType, Repository};
-use log::{debug, error, info, LevelFilter};
+use std::env::{current_dir, set_var, var};
 use std::process;
 
+use env_logger::try_init;
+use failure::ResultExt;
+use git2::{BranchType, Repository};
+use log::{debug, error, info, warn};
+
 fn main() -> Result<(), failure::Error> {
-    Builder::new().filter_level(LevelFilter::Info).try_init()?;
-    let repository = Repository::discover(".")?;
+    if var("RUST_LOG").is_err() {
+        set_var("RUST_LOG", "info");
+    }
+    try_init()?;
+    let repository =
+        Repository::discover(current_dir().context("Failed to fetch current directory")?)?;
 
     fetch_new_data(&repository)?;
 
     for branch in repository.branches(Some(BranchType::Local))? {
         let (mut branch, _) = branch?;
-        let branch_name = branch.name()?.unwrap_or("branch-name-not-utf8").to_owned();
+        let branch_name = if let Some(branch_name) = branch.name()? {
+            branch_name.to_owned()
+        } else {
+            info!("Ignoring branch that could not be decoded to utf-8");
+            debug!("Crazy branch name {:?}", branch.name_bytes());
+            continue;
+        };
         match branch.delete() {
             Ok(()) => info!("Deleted {}", &branch_name),
             Err(e) => error!("{}", e.message()),
@@ -26,12 +39,22 @@ fn fetch_new_data(repository: &Repository) -> Result<(), failure::Error> {
     let child = process::Command::new("git")
         .current_dir(repository.path())
         .args(&["fetch", "-p"])
-        .output()?;
+        .output()
+        .context("Error fetching repository data")?;
 
-    debug!(
-        "Process return\nSTDOUT: {:?}\nSTDERR: {:?}",
-        String::from_utf8(child.stdout).unwrap(),
-        String::from_utf8(child.stderr).unwrap()
-    );
+    let stdout_return = String::from_utf8_lossy(&child.stdout);
+    let stderr_return = String::from_utf8_lossy(&child.stderr);
+    if child.status.success() {
+        debug!(
+            "Process return\nSTDOUT: {:?}\nSTDERR: {:?}",
+            stdout_return, stderr_return
+        );
+    } else {
+        warn!(
+            "Error running git fetch\nProcess return\nSTDOUT: {:?}\nSTDERR: {:?}",
+            stdout_return, stderr_return
+        );
+    }
+
     Ok(())
 }
