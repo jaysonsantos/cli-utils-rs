@@ -1,5 +1,5 @@
 use failure::ResultExt;
-use log::debug;
+use log::{debug, trace};
 
 use log_types::FlowLogLine;
 
@@ -23,7 +23,13 @@ fn main() -> Result<(), failure::Error> {
         debug!("Processing {}", key);
         if let Some(lines) = data {
             for line in lines? {
-                let line = line?;
+                let line = match line {
+                    Ok(line) => line,
+                    Err(e) => {
+                        debug!("Skipping line because of {:?}", e);
+                        continue;
+                    }
+                };
                 let ctx = line
                     .execution_context()
                     .context("error building execution context")?;
@@ -31,10 +37,8 @@ fn main() -> Result<(), failure::Error> {
 
                 if filter.execute(&ctx)? {
                     println!("Matched with {:#?}", line);
-                    return Ok(());
                 } else {
-                    debug!("NOT Matched with {:#?}", line);
-                    ();
+                    trace!("NOT Matched with {:#?}", line);
                 }
             }
         }
