@@ -57,5 +57,7 @@ mod tests {
 
         let r = "1-10".parse::<Range>().unwrap().into_inner();
         assert_eq!(r, (1..=10));
+
+        assert!("1-".parse::<Range>().is_err());
     }
 }

@@ -21,3 +21,40 @@ ARGS:
 ### delete-local-branches
 [delete-local-branches](src/delete_local_branches.rs) delete all local branches except current active branch in order to
 declutter
+
+### aws-flow-logs
+[aws-flow-logs](src/aws_flow_logs.rs) parse aws flow logs in a bucket.
+```none
+error: The following required arguments were not provided:
+    <region>
+    <bucket>
+    <prefix>
+    <filter_query>
+
+USAGE:
+    aws-flow-logs <region> <bucket> <prefix> <filter_query>
+```
+#### Examples
+```none
+aws-flow-logs eu-central-1 bucket prefix/2019/04/24 'src.port in {80 443} && dst.port == 55540 && dst.ip in {10.0.0.0/8} && action == "REJECT"'
+Matched with FlowLogLine {
+    version: "2",
+    account_id: "x",
+    interface_id: "eni-x",
+    srcaddr: V4(
+        127.0.0.1,
+    ),
+    dstaddr: V4(
+        10.0.145.125,
+    ),
+    srcport: 443,
+    dstport: 55540,
+    protocol: "6",
+    packets: "1",
+    bytes: 40,
+    start: 1556114469,
+    end: 1556114525,
+    action: "REJECT",
+    log_status: "OK",
+}
+```
