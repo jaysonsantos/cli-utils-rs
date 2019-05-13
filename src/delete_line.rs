@@ -1,5 +1,3 @@
-#![feature(range_contains)]
-
 use std::fs::{rename, File};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::ops::RangeInclusive;
@@ -84,8 +82,8 @@ where
 mod tests {
     use std::io::Cursor;
 
+    use crate::skip_lines;
     use crate::utils::LINE_ENDING;
-    use crate::{skip_lines, Range};
 
     #[test]
     fn test_skip_lines() {
