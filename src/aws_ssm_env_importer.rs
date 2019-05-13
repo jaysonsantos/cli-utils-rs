@@ -112,8 +112,8 @@ fn main() -> Result<(), failure::Error> {
         let normalized_value = value.trim();
         if OPTIONS.dry_run {
             println!(
-                "Would import '{}' to '{}'",
-                normalized_key, normalized_value
+                "Would import '{}' to '{}' overwrite: {}",
+                normalized_key, normalized_value, OPTIONS.overwrite
             );
             return;
         }
@@ -122,6 +122,7 @@ fn main() -> Result<(), failure::Error> {
                 name: normalized_key.clone(),
                 value: normalized_value.to_string(),
                 type_: "SecureString".to_string(),
+                overwrite: Some(OPTIONS.overwrite),
                 ..Default::default()
             };
             match ssm.put_parameter(request).sync() {
