@@ -58,3 +58,37 @@ Matched with FlowLogLine {
     log_status: "OK",
 }
 ```
+
+### aws-ssm-env-importer
+Import .env files into ssm using a template for the key.
+
+```
+USAGE:
+    aws-ssm-env-importer [FLAGS] --app-name <app_name> --env-file <env_file> --environment <environment> --region <region> --template <template>
+
+FLAGS:
+    -d, --dry-run
+    -h, --help         Prints help information
+    -o, --overwrite
+    -u, --uppercase
+    -V, --version      Prints version information
+
+OPTIONS:
+    -a, --app-name <app_name>
+    -f, --env-file <env_file>
+    -e, --environment <environment>
+    -r, --region <region>
+    -t, --template <template>          Template to generate the key on SSM side, example
+                                       "/{environment}/{app_name}/{key}"
+```
+
+#### Example
+```bash
+aws-ssm-env-importer \
+    --env-file .env \
+    --environment environment \
+    --app-name test-app \
+    --template "/{environment}/{app_name}/{key}" \
+    --region eu-central-1 \
+    --dry-run
+ ```
