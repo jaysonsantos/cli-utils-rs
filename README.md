@@ -50,7 +50,7 @@ USAGE:
 ```
 #### Examples
 ```none
-aws-flow-logs eu-central-1 bucket prefix/2019/04/24 'src.port in {80 443} && dst.port == 55540 && dst.ip in {10.0.0.0/8} && action == "REJECT"'
+aws-flow-logs eu-central-1 bucket prefix/2019/04/24 'src.port in {80 443} && dstport == 55540 && dstip in {10.0.0.0/8} && action == "REJECT"'
 Matched with FlowLogLine {
     version: "2",
     account_id: "x",

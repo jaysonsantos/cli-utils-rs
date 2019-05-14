@@ -90,11 +90,15 @@ pub(crate) struct FlowLogLine {
 
 lazy_static::lazy_static! {
     pub static ref FLOW_SCHEME: Scheme = Scheme! {
-        src.port: Int,
-        src.ip: Ip,
+        srcport: Int,
+        srcip: Ip,
 
-        dst.port: Int,
-        dst.ip: Ip,
+        dstport: Int,
+        dstip: Ip,
+
+        start: Int,
+        end: Int,
+
         bytes: Int,
         action: Bytes,
         log_status: Bytes,
@@ -108,11 +112,14 @@ impl FlowLogLine {
 
     pub fn execution_context(&self) -> Result<ExecutionContext, failure::Error> {
         let mut ctx = ExecutionContext::new(Self::scheme());
-        ctx.set_field_value("src.port", self.srcport)?;
-        ctx.set_field_value("src.ip", self.srcaddr)?;
+        ctx.set_field_value("srcport", self.srcport)?;
+        ctx.set_field_value("srcip", self.srcaddr)?;
 
-        ctx.set_field_value("dst.port", self.dstport)?;
-        ctx.set_field_value("dst.ip", self.dstaddr)?;
+        ctx.set_field_value("dstport", self.dstport)?;
+        ctx.set_field_value("dstip", self.dstaddr)?;
+
+        ctx.set_field_value("start", self.start)?;
+        ctx.set_field_value("end", self.end)?;
 
         ctx.set_field_value("bytes", self.bytes)?;
         ctx.set_field_value("action", self.action.as_str())?;
