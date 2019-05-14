@@ -1,6 +1,20 @@
 # cli-utils
 I will store some utilities that I used on day to day and I chose rust to be able to use the same utilities in unix and windows systems.
 
+# Installing the commands
+To install you will need cargo installed.
+To install all binaries run:
+```bash
+cargo install \
+    --git https://github.com/jaysonsantos/cli-utils-rs
+```
+To install a specific binary:
+```bash
+cargo install \
+    --git https://github.com/jaysonsantos/cli-utils-rs \
+    --bin aws-ssm-env-importer
+```
+
 ## Available commands
 ### delete-line
 [delete-line](src/delete_line.rs) simply delete a line in a file.
