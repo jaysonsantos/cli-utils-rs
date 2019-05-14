@@ -7,6 +7,7 @@ use std::thread;
 use std::time::Duration;
 
 use envfile::EnvFile;
+use r2d2::Pool;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use rusoto_core::{Region, RusotoError};
@@ -72,12 +73,7 @@ fn to_template(var: &str) -> String {
     format!("{{{}}}", var)
 }
 
-fn format_key(
-    template: &str,
-    key: &str,
-    uppercase: bool,
-    data: &HashMap<String, String>,
-) -> String {
+fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &str>) -> String {
     // TODO: This is pretty slow and does not support spaces on the key
     let key = match uppercase {
         true => key.to_uppercase(),
@@ -99,57 +95,102 @@ fn main() -> Result<(), failure::Error> {
     }
 
     let mut data = HashMap::new();
-    data.insert("environment".to_owned(), OPTIONS.environment.clone());
-    data.insert("app_name".to_owned(), OPTIONS.app_name.clone());
+    data.insert("environment", OPTIONS.environment.as_str());
+    data.insert("app_name", OPTIONS.app_name.as_str());
 
     let pool = r2d2::Pool::builder()
         .max_size(MAXIMUM_SSM_CLIENTS)
         .build(SsmConnectionPool(Region::from_str(&OPTIONS.region)?))?;
 
-    env.store.par_iter().for_each(move |(key, value)| {
-        let ssm = pool.get().unwrap();
-        let normalized_key = format_key(&OPTIONS.template, &key, OPTIONS.uppercase, &data);
-        let normalized_value = value.trim();
-        if OPTIONS.dry_run {
-            println!(
-                "Would import '{}' to '{}' overwrite: {}",
-                normalized_key, normalized_value, OPTIONS.overwrite
-            );
-            return;
-        }
-        loop {
-            let request = PutParameterRequest {
-                name: normalized_key.clone(),
-                value: normalized_value.to_string(),
-                type_: "SecureString".to_string(),
-                overwrite: Some(OPTIONS.overwrite),
-                ..Default::default()
-            };
-            match ssm.put_parameter(request).sync() {
-                Ok(response) => {
-                    println!(
-                        "{} set to version {}",
-                        normalized_key,
-                        response.version.unwrap()
-                    );
-                    break;
-                }
-                Err(RusotoError::Service(PutParameterError::ParameterAlreadyExists(_))) => {
-                    println!("Ignored {} because it already exists", normalized_key);
-                    break;
-                }
-                Err(RusotoError::Unknown(ref e))
-                    if String::from_utf8_lossy(e.body.as_slice())
-                        .contains("ThrottlingException") =>
-                {
-                    thread::sleep(Duration::from_secs(1));
-                }
-                error => {
-                    error.unwrap();
-                }
-            };
-        }
-    });
+    env.store
+        .par_iter()
+        .for_each(move |(key, value)| put_parameter(&data, pool.clone(), &key, value));
 
     Ok(())
+}
+
+fn put_parameter(
+    data: &HashMap<&str, &str>,
+    pool: Pool<SsmConnectionPool>,
+    key: &str,
+    value: &str,
+) -> () {
+    let ssm = pool.get().unwrap();
+    let normalized_key = format_key(&OPTIONS.template, &key, OPTIONS.uppercase, &data);
+    let normalized_value = value.trim();
+    if OPTIONS.dry_run {
+        println!(
+            "Would import '{}' with value '{}' overwrite: {}",
+            normalized_key, normalized_value, OPTIONS.overwrite
+        );
+        return ();
+    }
+    loop {
+        let request = PutParameterRequest {
+            name: normalized_key.clone(),
+            value: normalized_value.to_string(),
+            type_: "SecureString".to_string(),
+            overwrite: Some(OPTIONS.overwrite),
+            ..Default::default()
+        };
+        match ssm.put_parameter(request).sync() {
+            Ok(response) => {
+                println!(
+                    "{} set to version {}",
+                    normalized_key,
+                    response.version.unwrap()
+                );
+                break;
+            }
+            Err(RusotoError::Service(PutParameterError::ParameterAlreadyExists(_))) => {
+                println!("Ignored {} because it already exists", normalized_key);
+                break;
+            }
+            Err(RusotoError::Unknown(ref e))
+                if String::from_utf8_lossy(e.body.as_slice()).contains("ThrottlingException") =>
+            {
+                thread::sleep(Duration::from_secs(1));
+            }
+            error => {
+                error.unwrap();
+            }
+        };
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::collections::HashMap;
+
+    use crate::{format_key, to_template};
+
+    #[test]
+    fn test_format_key() {
+        let mut data = HashMap::new();
+        data.insert("environment", "staging");
+        data.insert("app_name", "app");
+
+        let formatted = format_key("{key}", "test", false, &HashMap::new());
+        assert_eq!(formatted, "test");
+
+        let formatted = format_key("/{environment}/{key}", "test", false, &HashMap::new());
+        assert_eq!(formatted, "/{environment}/test");
+
+        let formatted = format_key("/{environment}/{app_name}/{key}", "test", false, &data);
+        assert_eq!(formatted, "/staging/app/test");
+
+        let formatted = format_key("{key}", "test", true, &HashMap::new());
+        assert_eq!(formatted, "TEST");
+
+        let formatted = format_key("/{environment}/{key}", "test", true, &HashMap::new());
+        assert_eq!(formatted, "/{environment}/TEST");
+
+        let formatted = format_key("/{environment}/{app_name}/{key}", "test", true, &data);
+        assert_eq!(formatted, "/staging/app/TEST");
+    }
+
+    #[test]
+    fn test_to_template() {
+        assert_eq!(to_template("key"), "{key}");
+    }
 }
