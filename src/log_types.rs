@@ -3,6 +3,11 @@ use std::net::IpAddr;
 use serde::Deserialize;
 use wirefilter::{ExecutionContext, Scheme};
 
+pub(crate) trait Searchable {
+    fn scheme() -> &'static Scheme;
+    fn execution_context(&self) -> Result<ExecutionContext, failure::Error>;
+}
+
 //#[derive(Debug, Deserialize, PartialEq)]
 //#[serde(untagged)]
 //pub(crate) enum OptionalNumber<'a, T>
@@ -91,10 +96,10 @@ pub(crate) struct FlowLogLine {
 lazy_static::lazy_static! {
     pub static ref FLOW_SCHEME: Scheme = Scheme! {
         srcport: Int,
-        srcip: Ip,
+        srcaddr: Ip,
 
         dstport: Int,
-        dstip: Ip,
+        dstaddr: Ip,
 
         start: Int,
         end: Int,
@@ -105,18 +110,18 @@ lazy_static::lazy_static! {
     };
 }
 
-impl FlowLogLine {
-    pub fn scheme() -> &'static Scheme {
+impl Searchable for FlowLogLine {
+    fn scheme() -> &'static Scheme {
         &*FLOW_SCHEME
     }
 
-    pub fn execution_context(&self) -> Result<ExecutionContext, failure::Error> {
+    fn execution_context(&self) -> Result<ExecutionContext, failure::Error> {
         let mut ctx = ExecutionContext::new(Self::scheme());
         ctx.set_field_value("srcport", self.srcport)?;
-        ctx.set_field_value("srcip", self.srcaddr)?;
+        ctx.set_field_value("srcaddr", self.srcaddr)?;
 
         ctx.set_field_value("dstport", self.dstport)?;
-        ctx.set_field_value("dstip", self.dstaddr)?;
+        ctx.set_field_value("dstaddr", self.dstaddr)?;
 
         ctx.set_field_value("start", self.start)?;
         ctx.set_field_value("end", self.end)?;
