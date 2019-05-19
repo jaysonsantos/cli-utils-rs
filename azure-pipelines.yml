@@ -132,4 +132,4 @@ jobs:
         inputs:
           gitHubConnection: ashleygwilliams-token
           repositoryName: cloudflare/wrangler
-assets: gh-release/*.tar.gz
+          assets: gh-release/*.tar.gz
