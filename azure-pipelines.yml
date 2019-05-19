@@ -44,7 +44,7 @@ jobs:
         displayName: "Install musl-tools"
       - script: |
           set -ex
-          cargo build --target x86_64-unknown-linux-musl --features vendored-openssl --release -Z unstable-options --out-dir binaries
+          cargo build --target x86_64-unknown-linux-musl --features vendored-openssl --release
       - template: ci/azure-collect-binaries.yml
         parameters:
           artifacts: target/x86_64-unknown-linux-musl/release
@@ -56,7 +56,7 @@ jobs:
       vmImage: macOS-10.13
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo build --release -Z unstable-options --out-dir binaries
+      - script: cargo build --release
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.7
       - template: ci/azure-collect-binaries.yml
@@ -69,7 +69,7 @@ jobs:
       vmImage: vs2017-win2016
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo build --release -Z unstable-options --out-dir binaries
+      - script: cargo build --release
         env:
           RUSTFLAGS: -Ctarget-feature=+crt-static
       - template: ci/azure-collect-binaries.yml
