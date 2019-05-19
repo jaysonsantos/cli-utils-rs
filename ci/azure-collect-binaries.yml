@@ -1,5 +1,5 @@
 parameters:
-  artifacts: 'target/release'
+  artifacts: 'installed'
   name: ''
 
 steps:

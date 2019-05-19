@@ -39,7 +39,7 @@ jobs:
       - template: ci/azure-install-rust.yml
       - script: |
           set -ex
-          cargo build --release
+          cargo install --path=. --root=installed
       - template: ci/azure-collect-binaries.yml
         parameters:
           name: dist_linux
@@ -50,7 +50,7 @@ jobs:
       vmImage: macOS-10.13
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo build --release
+      - script: cargo install --path=. --root=installed
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.7
       - template: ci/azure-collect-binaries.yml
@@ -63,7 +63,7 @@ jobs:
       vmImage: vs2017-win2016
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo build --release
+      - script: cargo install --path=. --root=installed
         env:
           RUSTFLAGS: -Ctarget-feature=+crt-static
       - template: ci/azure-collect-binaries.yml
