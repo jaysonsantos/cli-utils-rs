@@ -1,0 +1,16 @@
+parameters:
+  artifacts: 'binaries'
+  name: ''
+
+steps:
+  - bash: |
+      set -ex
+      dst=$BUILD_ARTIFACTSTAGINGDIRECTORY
+      for file in $(find ${{ parameters.artifacts }}/ -type f -executable); do
+        cp -v $file $dst/
+      done
+    displayName: Create distribution tarball
+  - task: PublishPipelineArtifact@0
+    inputs:
+      artifactName: ${{ parameters.name }}
+      targetPath: '$(Build.ArtifactStagingDirectory)'
