@@ -5,15 +5,35 @@
 
 trigger:
 - master
+- refs/tags/*
 
-pool:
-  vmImage: 'ubuntu-latest'
+jobs:
+  - job: test_lint
+    displayName: "Run tests, fmt, and clippy"
+    steps:
+      - template: ci/azure-install-rust.yml
+      - script: cargo test --locked
+        displayName: "cargo test --locked"
+      - script: cargo fmt --all -- --check
+        displayName: "cargo fmt"
+      - script: cargo clippy
+        displayName: "cargo clippy"
 
-steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+  - job: test_lint_windows
+    displayName: "Run tests (Windows)"
+    pool:
+      vmImage: vs2017-win2016
+    steps:
+      - template: ci/azure-install-rust.yml
+      - script: cargo test --locked
+        displayName: "cargo test --locked"
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+  - job: test_lint_nightly
+    displayName: "Run tests (nightly)"
+    steps:
+      - template: ci/azure-install-rust.yml
+        parameters:
+          toolchain: nightly
+      - script: cargo test --locked
+
+displayName: "cargo test --locked"
