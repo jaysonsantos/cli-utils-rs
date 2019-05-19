@@ -1,5 +1,5 @@
 parameters:
-  artifacts: 'installed'
+  artifacts: 'installed/bin'
   name: ''
 
 steps:
