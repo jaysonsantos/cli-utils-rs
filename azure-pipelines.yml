@@ -45,7 +45,7 @@ jobs:
       - script: |
           set -ex
           cargo build --target x86_64-unknown-linux-musl --features vendored-openssl --release -Z unstable-options --out-dir binaries
-      - template: ci/azure-create-tarball.yml
+      - template: ci/azure-collect-binaries.yml
         parameters:
           artifacts: target/x86_64-unknown-linux-musl/release
           name: dist_linux
@@ -59,7 +59,7 @@ jobs:
       - script: cargo build --release -Z unstable-options --out-dir binaries
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.7
-      - template: ci/azure-create-tarball.yml
+      - template: ci/azure-collect-binaries.yml
         parameters:
           name: dist_darwin
 
@@ -72,7 +72,7 @@ jobs:
       - script: cargo build --release -Z unstable-options --out-dir binaries
         env:
           RUSTFLAGS: -Ctarget-feature=+crt-static
-      - template: ci/azure-create-tarball.yml
+      - template: ci/azure-collect-binaries.yml
         parameters:
           name: dist_windows
 

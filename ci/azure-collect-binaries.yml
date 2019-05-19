@@ -1,15 +1,18 @@
 parameters:
-  artifacts: 'binaries'
+  artifacts: 'target/release'
   name: ''
 
 steps:
   - bash: |
       set -ex
       dst=$BUILD_ARTIFACTSTAGINGDIRECTORY
+      binaries="$(grep -a1 '\[\[bin\]\]' Cargo.toml | grep name | awk '{print $3}'| sed 's/"//gi')"
       for file in $(find ${{ parameters.artifacts }}/ -type f -executable); do
-        cp -v $file $dst/
+        cp -v $file $dst/ || true
+        cp -v $file.exe $dst/ || true
       done
-    displayName: Create distribution tarball
+      test "$(ls $dst | wc -l)" -gt "0"
+    displayName: Collect binaries
   - task: PublishPipelineArtifact@0
     inputs:
       artifactName: ${{ parameters.name }}
