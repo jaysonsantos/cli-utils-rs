@@ -130,6 +130,6 @@ jobs:
         condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
         displayName: 'Create GitHub Release'
         inputs:
-          gitHubConnection: jaysonsantos
+          gitHubConnection: github-token
           repositoryName: jaysonsantos/cli-utils-rs
           assets: gh-release/*.tar.gz
