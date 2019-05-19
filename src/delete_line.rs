@@ -1,3 +1,4 @@
+#[feature(range_contains)]
 use std::fs::{rename, File};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::ops::RangeInclusive;
