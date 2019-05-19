@@ -108,6 +108,7 @@ jobs:
             target=$1
             src=$2
             name=wrangler-$tag-$target
+            find .
             mkdir -p tmp/$name
             cp README.md \
               LICENSE-MIT \
