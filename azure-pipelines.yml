@@ -35,5 +35,4 @@ jobs:
         parameters:
           toolchain: nightly
       - script: cargo test --locked
-
-displayName: "cargo test --locked"
+        displayName: "cargo test --locked"
