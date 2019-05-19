@@ -1,0 +1,13 @@
+parameters:
+  artifacts: 'installed/bin'
+  name: ''
+
+steps:
+  - bash: |
+      set -ex
+      cp ${{ parameters.artifacts }}/* $BUILD_ARTIFACTSTAGINGDIRECTORY/
+    displayName: Collect binaries
+  - task: PublishPipelineArtifact@0
+    inputs:
+      artifactName: ${{ parameters.name }}
+      targetPath: '$(Build.ArtifactStagingDirectory)'
