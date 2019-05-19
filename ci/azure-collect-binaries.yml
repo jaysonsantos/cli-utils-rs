@@ -5,13 +5,7 @@ parameters:
 steps:
   - bash: |
       set -ex
-      dst=$BUILD_ARTIFACTSTAGINGDIRECTORY
-      binaries="$(grep -a1 '\[\[bin\]\]' Cargo.toml | grep name | awk '{print $3}'| sed 's/"//gi')"
-      for file in $(find ${{ parameters.artifacts }}/ -type f -executable); do
-        cp -v $file $dst/ || true
-        cp -v $file.exe $dst/ || true
-      done
-      test "$(ls $dst | wc -l)" -gt "0"
+      cp ${{ parameters.artifacts }}/* $BUILD_ARTIFACTSTAGINGDIRECTORY/
     displayName: Collect binaries
   - task: PublishPipelineArtifact@0
     inputs:
