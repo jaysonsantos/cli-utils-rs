@@ -1,4 +1,3 @@
-#[feature(range_contains)]
 use std::fs::{rename, File};
 use std::io::{BufRead, BufReader, Read, Write};
 use std::ops::RangeInclusive;
@@ -68,7 +67,8 @@ where
 {
     for (line_number, line) in BufReader::new(input).lines().enumerate() {
         let line_to_skip = line_number + 1;
-        if lines_to_skip.contains(&line_to_skip) {
+        // TODO: After https://github.com/rust-lang/rust/issues/32311 is done, change this to contains
+        if &line_to_skip >= lines_to_skip.start() && &line_to_skip <= lines_to_skip.end() {
             debug!("Skipping {}", line_to_skip);
             continue;
         }
@@ -99,6 +99,57 @@ mod tests {
 
         assert_eq!(
             format!("{}{}", vec!["1", "3"].join(&line_ending), line_ending),
+            output
+        );
+    }
+
+    #[test]
+    fn test_skip_initial_lines() {
+        let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
+        let input = vec!["1", "2", "3"].join(&line_ending);
+        let output = vec![];
+        let mut output_cursor = Cursor::new(output);
+
+        skip_lines(1..=2, Cursor::new(input), &mut output_cursor).unwrap();
+
+        let output = String::from_utf8(output_cursor.into_inner()).unwrap();
+
+        assert_eq!(
+            format!("{}{}", vec!["3"].join(&line_ending), line_ending),
+            output
+        );
+    }
+
+    #[test]
+    fn test_skip_final_lines() {
+        let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
+        let input = vec!["1", "2", "3"].join(&line_ending);
+        let output = vec![];
+        let mut output_cursor = Cursor::new(output);
+
+        skip_lines(2..=3, Cursor::new(input), &mut output_cursor).unwrap();
+
+        let output = String::from_utf8(output_cursor.into_inner()).unwrap();
+
+        assert_eq!(
+            format!("{}{}", vec!["1"].join(&line_ending), line_ending),
+            output
+        );
+    }
+
+    #[test]
+    fn test_skip_last_line() {
+        let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
+        let input = vec!["1", "2", "3"].join(&line_ending);
+        let output = vec![];
+        let mut output_cursor = Cursor::new(output);
+
+        skip_lines(3..=3, Cursor::new(input), &mut output_cursor).unwrap();
+
+        let output = String::from_utf8(output_cursor.into_inner()).unwrap();
+
+        assert_eq!(
+            format!("{}{}", vec!["1", "2"].join(&line_ending), line_ending),
             output
         );
     }
