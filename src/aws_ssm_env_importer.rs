@@ -75,9 +75,10 @@ fn to_template(var: &str) -> String {
 
 fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &str>) -> String {
     // TODO: This is pretty slow and does not support spaces on the key
-    let key = match uppercase {
-        true => key.to_uppercase(),
-        false => key.to_lowercase(),
+    let key = if uppercase {
+        key.to_uppercase()
+    } else {
+        key.to_lowercase()
     };
     let mut output = template.to_owned().replace(&to_template("key"), &key);
     for (key, value) in data {
@@ -89,7 +90,7 @@ fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &
 fn main() -> Result<(), failure::Error> {
     let env = EnvFile::new(&OPTIONS.env_file)?;
     let key_template = to_template("key");
-    if OPTIONS.template.contains(&key_template) == false {
+    if !OPTIONS.template.contains(&key_template) {
         eprintln!("{{key}} has to be defined in template");
         process::exit(1);
     }
@@ -114,7 +115,7 @@ fn put_parameter(
     pool: Pool<SsmConnectionPool>,
     key: &str,
     value: &str,
-) -> () {
+) {
     let ssm = pool.get().unwrap();
     let normalized_key = format_key(&OPTIONS.template, &key, OPTIONS.uppercase, &data);
     let normalized_value = value.trim();
@@ -123,7 +124,7 @@ fn put_parameter(
             "Would import '{}' with value '{}' overwrite: {}",
             normalized_key, normalized_value, OPTIONS.overwrite
         );
-        return ();
+        return;
     }
     loop {
         let request = PutParameterRequest {
@@ -147,12 +148,17 @@ fn put_parameter(
                 break;
             }
             Err(RusotoError::Unknown(ref e))
-                if String::from_utf8_lossy(e.body.as_slice()).contains("ThrottlingException") =>
+                if String::from_utf8_lossy(e.body.as_ref()).contains("ThrottlingException") =>
             {
                 thread::sleep(Duration::from_secs(1));
             }
             error => {
-                error.expect(&format!("Unexpected error while trying to put key = {:?} and value = {:?}", normalized_key, normalized_value));
+                error.unwrap_or_else(|_| {
+                    panic!(
+                        "Unexpected error while trying to put key = {:?} and value = {:?}",
+                        normalized_key, normalized_value
+                    )
+                });
             }
         };
     }

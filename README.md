@@ -106,3 +106,34 @@ aws-ssm-env-importer \
     --region eu-central-1 \
     --dry-run
  ```
+
+### aws-ssm-env-exporter
+Export ssm keys to .env files.
+
+```
+USAGE:
+    aws-ssm-env-exporter [FLAGS] [OPTIONS] --env-file <env-file> --path <path> --replace <replace> --search <search>
+
+FLAGS:
+    -h, --help         Prints help information
+    -l, --lowercase    
+    -u, --uppercase    
+    -V, --version      Prints version information
+
+OPTIONS:
+    -f, --env-file <env-file>    
+    -p, --path <path>            
+    -r, --region <region>        
+    -t, --replace <replace>      
+    -e, --search <search>        
+```
+
+#### Example
+```bash
+aws-ssm-env-exporter \
+    --env-file output.env \
+    --path /my/app \
+    --search '.+/(.[^/]*)$' \
+    --uppercase \
+    --replace $1
+ ```

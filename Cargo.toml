@@ -1,30 +1,31 @@
 [package]
 name = "jaysons-cli-utils"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
 failure = "0.1.5"
 clap = "2.32.0"
-env_logger = "0.6.1"
+env_logger = "0.7.1"
 log = "0.4.6"
-git2 = "0.8.0"
+git2 = "0.10.1"
 flate2 = "1.0.7"
 serde = "1.0.90"
 serde_derive = "1.0.90"
-rusoto_core = "0.38.0"
-rusoto_s3 = "0.38.0"
-rusoto_ssm = "0.38.0"
+rusoto_core = "0.41.0"
+rusoto_s3 = "0.41.0"
+rusoto_ssm = "0.41.0"
 chrono = "0.4.6"
-structopt = "0.2.15"
+structopt = "0.3.4"
 lazy_static = "1.3.0"
 human_format = "1.0.2"
 csv = "1.0.7"
 wirefilter-engine = "0.6.1"
 envfile = "0.2.1"
-rayon = "1.0.3"
 r2d2 = "0.8.4"
+rayon = "1.0.3"
+regex = "1.3.1"
 
 [[bin]]
 name = "delete-line"
@@ -38,7 +39,10 @@ path = "src/delete_local_branches.rs"
 name = "aws-flow-logs"
 path = "src/aws_flow_logs.rs"
 
-
 [[bin]]
 name = "aws-ssm-env-importer"
 path = "src/aws_ssm_env_importer.rs"
+
+[[bin]]
+name = "aws-ssm-env-exporter"
+path = "src/aws_ssm_env_exporter.rs"
