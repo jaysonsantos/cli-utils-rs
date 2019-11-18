@@ -152,7 +152,7 @@ fn put_parameter(
                 thread::sleep(Duration::from_secs(1));
             }
             error => {
-                error.unwrap();
+                error.expect(&format!("Unexpected error while trying to put key = {:?} and value = {:?}", normalized_key, normalized_value));
             }
         };
     }
