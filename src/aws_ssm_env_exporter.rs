@@ -131,7 +131,7 @@ mod tests {
             ),
             (
                 Options {
-                    search: re.clone(),
+                    search: re,
                     replace: "$1".to_string(),
                     uppercase: false,
                     lowercase: true,

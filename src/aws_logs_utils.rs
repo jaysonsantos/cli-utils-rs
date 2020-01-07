@@ -22,8 +22,8 @@ pub struct Options {
 }
 
 lazy_static::lazy_static! {
-    static ref INTERESTING_ERRORS: HashSet<u16> = (501..=504).into_iter().collect();
-    static ref IGNORED_ELB_ERRORS: HashSet<u16> = (300..=460).into_iter().collect();
+    static ref INTERESTING_ERRORS: HashSet<u16> = (501..=504).collect();
+    static ref IGNORED_ELB_ERRORS: HashSet<u16> = (300..=460).collect();
     pub (crate) static ref OPTIONS: Options = Options::from_args();
     pub (crate) static ref S3_CLIENT: S3Client = S3Client::new(OPTIONS.region.parse().unwrap());
 }

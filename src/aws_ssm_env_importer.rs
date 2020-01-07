@@ -7,13 +7,13 @@ use std::thread;
 use std::time::Duration;
 
 use envfile::EnvFile;
+use failure::ResultExt;
 use r2d2::Pool;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use rusoto_core::{Region, RusotoError};
 use rusoto_ssm::{PutParameterError, PutParameterRequest, Ssm, SsmClient as RusotoSsmClient};
 use structopt::StructOpt;
-use failure::ResultExt;
 
 const MAXIMUM_SSM_CLIENTS: u32 = 4;
 
@@ -154,12 +154,14 @@ fn put_parameter(
                 thread::sleep(Duration::from_secs(1));
             }
             error @ Err(_) => {
-                error.with_context(|_| {
-                    format!(
-                        "Unexpected error while trying to put key = {:?} and value = {:?}",
-                        normalized_key, normalized_value
-                    )
-                }).unwrap();
+                error
+                    .with_context(|_| {
+                        format!(
+                            "Unexpected error while trying to put key = {:?} and value = {:?}",
+                            normalized_key, normalized_value
+                        )
+                    })
+                    .unwrap();
             }
         };
     }

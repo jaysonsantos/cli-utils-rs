@@ -67,8 +67,7 @@ where
 {
     for (line_number, line) in BufReader::new(input).lines().enumerate() {
         let line_to_skip = line_number + 1;
-        // TODO: After https://github.com/rust-lang/rust/issues/32311 is done, change this to contains
-        if &line_to_skip >= lines_to_skip.start() && &line_to_skip <= lines_to_skip.end() {
+        if lines_to_skip.contains(&line_to_skip) {
             debug!("Skipping {}", line_to_skip);
             continue;
         }

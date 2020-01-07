@@ -50,7 +50,10 @@ impl<'a> BucketKeyIterator<'a> {
                 }
                 None => false,
             }) {
-                let key = key.key.as_ref().ok_or(err_msg("Key was not present"))?;
+                let key = key
+                    .key
+                    .as_ref()
+                    .ok_or_else(|| err_msg("Key was not present"))?;
                 output_keys.push(key.clone());
             }
 
