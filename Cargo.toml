@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 async-std = "1.2.0"
 clap = "2.32.0"
-chrono = "0.4.6"
+chrono = "0.4.10"
 csv = "1.0.7"
 env_logger = "0.7.1"
 envfile = "0.2.1"
