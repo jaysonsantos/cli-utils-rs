@@ -5,7 +5,7 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-async-std = "1.2.0"
+async-std = "1.4.0"
 clap = "2.32.0"
 chrono = "0.4.6"
 csv = "1.0.7"
