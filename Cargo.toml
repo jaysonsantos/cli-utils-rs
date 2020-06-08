@@ -29,9 +29,6 @@ structopt = "0.3.4"
 tokio = "0.2.21"
 wirefilter-engine = "0.6.1"
 
-[dependencies.tokio-compat]
-git = "https://github.com/tokio-rs/tokio-compat"
-
 [[bin]]
 name = "delete-line"
 path = "src/delete_line.rs"
