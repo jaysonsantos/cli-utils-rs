@@ -2,7 +2,7 @@ use std::collections::HashSet;
 use std::fmt::Debug;
 use std::io::Read;
 
-use failure::ResultExt;
+use color_eyre::eyre::{Result, WrapErr};
 use flate2::read::MultiGzDecoder;
 use log::{debug, info, trace};
 use rusoto_s3::{S3Client, S3};
@@ -12,6 +12,7 @@ use wirefilter::FilterAst;
 
 use crate::aws_s3_utils::BucketKeyIterator;
 use crate::log_types::Searchable;
+use color_eyre::Report;
 
 #[derive(Debug, StructOpt)]
 pub struct Options {
@@ -32,7 +33,7 @@ pub(crate) fn process_s3_file<T>(
     bucket: &str,
     key: &str,
     has_headers: bool,
-) -> Option<Result<impl Iterator<Item = Result<T, csv::Error>>, failure::Error>>
+) -> Option<Result<impl Iterator<Item = std::result::Result<T, csv::Error>>>>
 where
     T: DeserializeOwned,
 {
@@ -45,10 +46,10 @@ where
     let response = match S3_CLIENT
         .get_object(request)
         .sync()
-        .context("Error downloading log file")
+        .wrap_err("Error downloading log file")
     {
         Ok(response) => response,
-        Err(e) => return Some(Err(e.into())),
+        Err(e) => return Some(Err(e)),
     };
 
     if let Some(body) = response.body {
@@ -87,13 +88,15 @@ where
         .into_deserialize()
 }
 
-pub(crate) fn parse_logs<S>(options: &'static Options) -> Result<(), failure::Error>
+pub(crate) fn parse_logs<S>(options: &'static Options) -> Result<()>
 where
     S: Searchable + DeserializeOwned + Debug,
 {
     debug!("Starting process");
     let scheme = S::scheme();
-    let ast = scheme.parse(&options.filter_query)?;
+    let ast = scheme
+        .parse(&options.filter_query)
+        .wrap_err("failed to parse filter query")?;
     for key in BucketKeyIterator::new(options.bucket.as_str(), Some(options.prefix.as_str())) {
         let key = key?;
         process_log_file::<S>(options.bucket.as_str(), key.as_str(), &ast)?;
@@ -102,7 +105,7 @@ where
     Ok(())
 }
 
-fn process_log_file<S>(bucket: &str, key: &str, ast: &FilterAst) -> Result<(), failure::Error>
+fn process_log_file<S>(bucket: &str, key: &str, ast: &FilterAst) -> Result<()>
 where
     S: Searchable + DeserializeOwned + Debug,
 {
@@ -124,15 +127,15 @@ where
     Ok(())
 }
 
-fn process_log_line<S>(line: S, ast: &FilterAst) -> Result<(), failure::Error>
+fn process_log_line<S>(line: S, ast: &FilterAst) -> Result<()>
 where
     S: Searchable + DeserializeOwned + Debug,
 {
     let filter = ast.clone().compile();
     let ctx = line
         .execution_context()
-        .context("error building execution context")?;
-    if filter.execute(&ctx)? {
+        .wrap_err("error building execution context")?;
+    if filter.execute(&ctx).map_err(Report::msg)? {
         println!("Matched with {:#?}", line);
     } else {
         trace!("NOT Matched with {:#?}", line);

@@ -6,8 +6,8 @@ use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
+use color_eyre::eyre::{Result, WrapErr};
 use envfile::EnvFile;
-use failure::ResultExt;
 use r2d2::Pool;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
@@ -88,7 +88,8 @@ fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &
     output.trim().to_owned()
 }
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     let env = EnvFile::new(&OPTIONS.env_file)?;
     let key_template = to_template("key");
     if !OPTIONS.template.contains(&key_template) {
@@ -155,7 +156,7 @@ fn put_parameter(
             }
             error @ Err(_) => {
                 error
-                    .with_context(|_| {
+                    .wrap_err_with(|| {
                         format!(
                             "Unexpected error while trying to put key = {:?} and value = {:?}",
                             normalized_key, normalized_value

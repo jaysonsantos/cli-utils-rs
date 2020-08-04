@@ -1,11 +1,12 @@
 use std::net::IpAddr;
 
+use color_eyre::{Report, Result};
 use serde::Deserialize;
 use wirefilter::{ExecutionContext, Scheme};
 
 pub(crate) trait Searchable {
     fn scheme() -> &'static Scheme;
-    fn execution_context(&self) -> Result<ExecutionContext, failure::Error>;
+    fn execution_context(&self) -> Result<ExecutionContext>;
 }
 
 //#[derive(Debug, Deserialize, PartialEq)]
@@ -115,20 +116,28 @@ impl Searchable for FlowLogLine {
         &*FLOW_SCHEME
     }
 
-    fn execution_context(&self) -> Result<ExecutionContext, failure::Error> {
+    fn execution_context(&self) -> Result<ExecutionContext> {
         let mut ctx = ExecutionContext::new(Self::scheme());
-        ctx.set_field_value("srcport", self.srcport)?;
-        ctx.set_field_value("srcaddr", self.srcaddr)?;
+        ctx.set_field_value("srcports", self.srcport)
+            .map_err(Report::msg)?;
+        ctx.set_field_value("srcaddr", self.srcaddr)
+            .map_err(Report::msg)?;
 
-        ctx.set_field_value("dstport", self.dstport)?;
-        ctx.set_field_value("dstaddr", self.dstaddr)?;
+        ctx.set_field_value("dstport", self.dstport)
+            .map_err(Report::msg)?;
+        ctx.set_field_value("dstaddr", self.dstaddr)
+            .map_err(Report::msg)?;
 
-        ctx.set_field_value("start", self.start)?;
-        ctx.set_field_value("end", self.end)?;
+        ctx.set_field_value("start", self.start)
+            .map_err(Report::msg)?;
+        ctx.set_field_value("end", self.end).map_err(Report::msg)?;
 
-        ctx.set_field_value("bytes", self.bytes)?;
-        ctx.set_field_value("action", self.action.as_str())?;
-        ctx.set_field_value("log_status", self.log_status.as_str())?;
+        ctx.set_field_value("bytes", self.bytes)
+            .map_err(Report::msg)?;
+        ctx.set_field_value("action", self.action.as_str())
+            .map_err(Report::msg)?;
+        ctx.set_field_value("log_status", self.log_status.as_str())
+            .map_err(Report::msg)?;
 
         Ok(ctx)
     }

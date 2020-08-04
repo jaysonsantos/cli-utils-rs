@@ -1,4 +1,5 @@
-use failure::err_msg;
+use color_eyre::eyre::eyre;
+use color_eyre::Result;
 
 use rusoto_s3::{S3Client, S3};
 
@@ -25,7 +26,7 @@ impl<'a> BucketKeyIterator<'a> {
         }
     }
 
-    fn iter_next(&mut self) -> Result<Option<String>, failure::Error> {
+    fn iter_next(&mut self) -> Result<Option<String>> {
         if let Some(key) = self.keys.pop() {
             return Ok(Some(key));
         }
@@ -53,7 +54,7 @@ impl<'a> BucketKeyIterator<'a> {
                 let key = key
                     .key
                     .as_ref()
-                    .ok_or_else(|| err_msg("Key was not present"))?;
+                    .ok_or_else(|| eyre!("Key was not present"))?;
                 output_keys.push(key.clone());
             }
 
@@ -69,7 +70,7 @@ impl<'a> BucketKeyIterator<'a> {
 }
 
 impl<'a> Iterator for BucketKeyIterator<'a> {
-    type Item = Result<String, failure::Error>;
+    type Item = Result<String>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.iter_next() {

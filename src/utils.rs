@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 use std::str::FromStr;
 
-use failure::{self, format_err, ResultExt};
+use color_eyre::eyre::{eyre, WrapErr};
 
 #[cfg(target_os = "windows")]
 pub static LINE_ENDING: &[u8; 2] = b"\r\n";
@@ -27,14 +27,14 @@ impl Range {
 }
 
 impl FromStr for Range {
-    type Err = failure::Error;
+    type Err = color_eyre::eyre::Error;
 
     fn from_str(data: &str) -> Result<Range, Self::Err> {
         if data.contains('-') {
             let parts: Result<Vec<usize>, _> = data.split('-').take(2).map(str::parse).collect();
-            let parts = parts.context(format!("Invalid range format {:?}", data))?;
+            let parts = parts.wrap_err(format!("Invalid range format {:?}", data))?;
             if parts.len() != 2 {
-                return Err(format_err!("Invalid line length range {}", data));
+                return Err(eyre!(format!("Invalid line length range {}", data)));
             }
             let beginning = parts[0];
             let ending = parts[1];

@@ -3,8 +3,8 @@ use std::io::{BufRead, BufReader, Read, Write};
 use std::ops::RangeInclusive;
 
 use clap::{crate_version, App, Arg};
+use color_eyre::eyre::Result;
 use env_logger::try_init;
-use failure;
 use log::{debug, trace};
 
 use crate::utils::{Range, LINE_ENDING};
@@ -29,7 +29,8 @@ fn app<'a, 'b>() -> App<'a, 'b> {
         )
 }
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     try_init()?;
     let matches = app().get_matches();
 
@@ -60,7 +61,7 @@ pub fn skip_lines<R, W>(
     lines_to_skip: RangeInclusive<usize>,
     input: R,
     output: &mut W,
-) -> Result<(), failure::Error>
+) -> Result<()>
 where
     R: Read,
     W: Write,

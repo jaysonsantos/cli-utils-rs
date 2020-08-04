@@ -2,6 +2,7 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::path::PathBuf;
 
+use color_eyre::eyre::Result;
 use envfile::EnvFile;
 use log::Level::Debug;
 use log::{debug, log_enabled};
@@ -38,7 +39,8 @@ lazy_static::lazy_static! {
     pub (crate) static ref OPTIONS: Options = Options::from_args();
 }
 
-fn main() -> Result<(), failure::Error> {
+fn main() -> Result<()> {
+    color_eyre::install()?;
     env_logger::init();
 
     let file = File::create(&OPTIONS.env_file)?;
@@ -56,10 +58,7 @@ fn main() -> Result<(), failure::Error> {
     Ok(())
 }
 
-fn fetch_configs(
-    cli: &SsmClient,
-    next_token: Option<String>,
-) -> Result<HashMap<String, String>, failure::Error> {
+fn fetch_configs(cli: &SsmClient, next_token: Option<String>) -> Result<HashMap<String, String>> {
     let mut output = HashMap::new();
     let request = GetParametersByPathRequest {
         path: OPTIONS.path.clone(),
