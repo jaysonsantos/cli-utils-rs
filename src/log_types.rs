@@ -118,7 +118,7 @@ impl Searchable for FlowLogLine {
 
     fn execution_context(&self) -> Result<ExecutionContext> {
         let mut ctx = ExecutionContext::new(Self::scheme());
-        ctx.set_field_value("srcports", self.srcport)
+        ctx.set_field_value("srcport", self.srcport)
             .map_err(Report::msg)?;
         ctx.set_field_value("srcaddr", self.srcaddr)
             .map_err(Report::msg)?;

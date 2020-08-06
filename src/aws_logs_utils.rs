@@ -3,6 +3,7 @@ use std::fmt::Debug;
 use std::io::Read;
 
 use color_eyre::eyre::{Result, WrapErr};
+use color_eyre::Report;
 use flate2::read::MultiGzDecoder;
 use log::{debug, info, trace};
 use rusoto_s3::{S3Client, S3};
@@ -12,7 +13,7 @@ use wirefilter::FilterAst;
 
 use crate::aws_s3_utils::BucketKeyIterator;
 use crate::log_types::Searchable;
-use color_eyre::Report;
+use crate::RUNTIME;
 
 #[derive(Debug, StructOpt)]
 pub struct Options {
@@ -43,9 +44,10 @@ where
         key: key.to_owned(),
         ..Default::default()
     };
-    let response = match S3_CLIENT
-        .get_object(request)
-        .sync()
+    let response = match RUNTIME
+        .handle()
+        .clone()
+        .block_on(S3_CLIENT.get_object(request))
         .wrap_err("Error downloading log file")
     {
         Ok(response) => response,
