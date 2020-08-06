@@ -14,16 +14,19 @@ use rayon::iter::ParallelIterator;
 use rusoto_core::{Region, RusotoError};
 use rusoto_ssm::{PutParameterError, PutParameterRequest, Ssm, SsmClient as RusotoSsmClient};
 use structopt::StructOpt;
+use tokio::runtime::{Builder, Runtime};
 
 const MAXIMUM_SSM_CLIENTS: u32 = 4;
 
 #[derive(Debug)]
 struct DumbError;
+
 impl Display for DumbError {
     fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
         Ok(f.write_str("Error")?)
     }
 }
+
 impl std::error::Error for DumbError {}
 
 #[derive(Debug, StructOpt)]
@@ -68,6 +71,7 @@ impl r2d2::ManageConnection for SsmConnectionPool {
 
 lazy_static::lazy_static! {
     pub (crate) static ref OPTIONS: Options = Options::from_args();
+    static ref RUNTIME: Runtime = Builder::new().threaded_scheduler().enable_all().build().unwrap();
 }
 
 fn to_template(var: &str) -> String {
@@ -132,11 +136,11 @@ fn put_parameter(
         let request = PutParameterRequest {
             name: normalized_key.clone(),
             value: normalized_value.to_string(),
-            type_: "SecureString".to_string(),
+            type_: Some("SecureString".to_string()),
             overwrite: Some(OPTIONS.overwrite),
             ..Default::default()
         };
-        match ssm.put_parameter(request).sync() {
+        match RUNTIME.handle().block_on(ssm.put_parameter(request)) {
             Ok(response) => {
                 println!(
                     "{} set to version {}",

@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::fs::File;
 use std::path::PathBuf;
 
 use color_eyre::eyre::Result;
@@ -10,6 +9,7 @@ use regex::Regex;
 use rusoto_core::Region;
 use rusoto_ssm::{GetParametersByPathRequest, Ssm, SsmClient};
 use structopt::StructOpt;
+use tokio::fs::File;
 
 #[derive(Debug, StructOpt)]
 struct Options {
@@ -39,17 +39,18 @@ lazy_static::lazy_static! {
     pub (crate) static ref OPTIONS: Options = Options::from_args();
 }
 
-fn main() -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
     color_eyre::install()?;
     env_logger::init();
 
-    let file = File::create(&OPTIONS.env_file)?;
+    let file = File::create(&OPTIONS.env_file).await?;
     drop(file);
 
     let mut env = EnvFile::new(&OPTIONS.env_file)?;
 
     let cli = SsmClient::new(OPTIONS.get_region());
-    let configs = fetch_configs(&cli, None)?;
+    let configs = fetch_configs(&cli).await?;
     for (key, value) in configs {
         let key = transform_key(&key, &OPTIONS);
         env.update(&key, &value);
@@ -58,25 +59,29 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn fetch_configs(cli: &SsmClient, next_token: Option<String>) -> Result<HashMap<String, String>> {
+async fn fetch_configs(cli: &SsmClient) -> Result<HashMap<String, String>> {
     let mut output = HashMap::new();
-    let request = GetParametersByPathRequest {
-        path: OPTIONS.path.clone(),
-        with_decryption: Some(true),
-        next_token,
-        ..Default::default()
-    };
-    let response = cli.get_parameters_by_path(request).sync()?;
-    if let Some(parameters) = response.parameters {
-        for parameter in parameters {
-            output.insert(parameter.name.unwrap(), parameter.value.unwrap());
+    let mut next_token: Option<String> = None;
+    loop {
+        let request = GetParametersByPathRequest {
+            path: OPTIONS.path.clone(),
+            with_decryption: Some(true),
+            next_token: next_token.clone(),
+            ..Default::default()
+        };
+        let response = cli.get_parameters_by_path(request).await?;
+        if let Some(parameters) = response.parameters {
+            for parameter in parameters {
+                output.insert(parameter.name.unwrap(), parameter.value.unwrap());
+            }
+        }
+
+        if response.next_token.is_some() {
+            next_token = response.next_token.clone();
+        } else {
+            break;
         }
     }
-
-    if response.next_token.is_some() {
-        output.extend(fetch_configs(cli, response.next_token)?)
-    }
-
     Ok(output)
 }
 
