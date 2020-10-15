@@ -137,3 +137,14 @@ aws-ssm-env-exporter \
     --uppercase \
     --replace $1
  ```
+
+### fix-ksql-deleted-topics
+When running ksql, if you delete the topics for a stream instead of 
+stopping the queries and then deleting the stream this can lead to really long load times on ksql.
+To fix the problem you first need to see the variable `KSQL_KSQL_STREAMS_PRODUCER_MAX_BLOCK_MS`
+with a lower value like 1000 and restart ksql.
+
+### Example
+```bash
+fix-ksql-deleted-topics http://ksql-host:port/ksql
+```
