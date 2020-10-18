@@ -45,9 +45,12 @@ impl Client {
             .post(self.base_url.clone())
             .json(&Query::with_statement(statement))
             .send()
+            .compat()
             .await?;
 
-        Ok(response.json().await.wrap_err("failed to run query")?)
+        let json_response = response.json().await.wrap_err("failed to run query");
+        trace!("Query result {:#?}", json_response);
+        Ok(json_response?)
     }
 }
 
@@ -77,8 +80,11 @@ struct Message {
 #[tokio::main]
 async fn main() -> Result<()> {
     color_eyre::install()?;
+    env_logger::try_init()?;
+
     let topics_regex = regex::Regex::new(r"\[(\w+)")?;
     let queries_regex = regex::Regex::new(r"CSAS_\w+")?;
+
     let client = Client::new(args().nth(1).expect("specify the ksql url").as_str())?;
     let response = client
         .query::<Vec<Warnings>>("show streams extended;")
