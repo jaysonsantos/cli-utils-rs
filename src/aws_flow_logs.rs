@@ -10,9 +10,9 @@ mod aws_s3_utils;
 mod log_types;
 
 lazy_static! {
-    pub static ref RUNTIME: Runtime = Builder::new()
+    // Multi threaded is needed otherwise Handle::block_on will hang
+    pub static ref RUNTIME: Runtime = Builder::new_multi_thread()
         .enable_all()
-        .threaded_scheduler() // This is needed otherwise Handle::block_on will hang
         .build()
         .expect("failed to create runtime");
 }

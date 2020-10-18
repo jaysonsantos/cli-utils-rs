@@ -1,13 +1,16 @@
 use std::env::args;
+use std::fmt::Debug;
 
 use color_eyre::eyre::WrapErr;
 use color_eyre::Result;
 use http::header::CONTENT_TYPE;
+use log::trace;
 use reqwest::header::HeaderMap;
 use reqwest::Url;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use tokio_compat_02::FutureExt;
 
 struct Client {
     client: reqwest::Client,
@@ -34,7 +37,7 @@ impl Client {
 
     pub async fn query<T>(&self, statement: &str) -> Result<T>
     where
-        T: DeserializeOwned,
+        T: DeserializeOwned + Debug,
     {
         println!("Running {:?}", statement);
         let response = self

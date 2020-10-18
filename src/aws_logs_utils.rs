@@ -9,6 +9,7 @@ use log::{debug, info, trace};
 use rusoto_s3::{S3Client, S3};
 use serde::de::DeserializeOwned;
 use structopt::StructOpt;
+use tokio_compat_02::FutureExt;
 use wirefilter::FilterAst;
 
 use crate::aws_s3_utils::BucketKeyIterator;
@@ -45,9 +46,7 @@ where
         ..Default::default()
     };
     let response = match RUNTIME
-        .handle()
-        .clone()
-        .block_on(S3_CLIENT.get_object(request))
+        .block_on(S3_CLIENT.get_object(request).compat())
         .wrap_err("Error downloading log file")
     {
         Ok(response) => response,

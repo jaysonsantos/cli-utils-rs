@@ -1,6 +1,7 @@
 use color_eyre::eyre::eyre;
 use color_eyre::Result;
 use rusoto_s3::{S3Client, S3};
+use tokio_compat_02::FutureExt;
 
 use crate::aws_logs_utils::S3_CLIENT;
 use crate::RUNTIME;
@@ -42,10 +43,7 @@ impl<'a> BucketKeyIterator<'a> {
             ..Default::default()
         };
 
-        let response = RUNTIME
-            .handle()
-            .clone()
-            .block_on(self.cli.list_objects_v2(request))?;
+        let response = RUNTIME.block_on(self.cli.list_objects_v2(request).compat())?;
         if let Some(keys) = response.contents {
             let mut output_keys = vec![];
             for key in keys.iter().filter(|object| match object.key {

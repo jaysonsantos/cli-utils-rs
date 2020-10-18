@@ -71,7 +71,7 @@ impl r2d2::ManageConnection for SsmConnectionPool {
 
 lazy_static::lazy_static! {
     pub (crate) static ref OPTIONS: Options = Options::from_args();
-    static ref RUNTIME: Runtime = Builder::new().threaded_scheduler().enable_all().build().unwrap();
+    static ref RUNTIME: Runtime = Builder::new_multi_thread().enable_all().build().unwrap();
 }
 
 fn to_template(var: &str) -> String {
@@ -140,7 +140,7 @@ fn put_parameter(
             overwrite: Some(OPTIONS.overwrite),
             ..Default::default()
         };
-        match RUNTIME.handle().block_on(ssm.put_parameter(request)) {
+        match RUNTIME.block_on(ssm.put_parameter(request)) {
             Ok(response) => {
                 println!(
                     "{} set to version {}",
