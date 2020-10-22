@@ -9,12 +9,13 @@ use std::time::Duration;
 use color_eyre::eyre::{Result, WrapErr};
 use envfile::EnvFile;
 use r2d2::Pool;
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rusoto_core::{Region, RusotoError};
 use rusoto_ssm::{PutParameterError, PutParameterRequest, Ssm, SsmClient as RusotoSsmClient};
 use structopt::StructOpt;
 use tokio::runtime::{Builder, Runtime};
+use tokio_compat_02::FutureExt;
+use tracing::{info, error, warn};
 
 const MAXIMUM_SSM_CLIENTS: u32 = 4;
 
@@ -50,6 +51,7 @@ struct Options {
     dry_run: bool,
 }
 
+#[derive(Debug)]
 struct SsmConnectionPool(Region);
 
 impl r2d2::ManageConnection for SsmConnectionPool {
@@ -78,6 +80,7 @@ fn to_template(var: &str) -> String {
     format!("{{{}}}", var)
 }
 
+#[tracing::instrument]
 fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &str>) -> String {
     // TODO: This is pretty slow and does not support spaces on the key
     let key = if uppercase {
@@ -94,10 +97,12 @@ fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &
 
 fn main() -> Result<()> {
     color_eyre::install()?;
-    let env = EnvFile::new(&OPTIONS.env_file)?;
+    tracing_subscriber::fmt().with_max_level(tracing::Level::INFO).init();
+
+    let env = EnvFile::new(&OPTIONS.env_file).wrap_err("failed to open env file")?;
     let key_template = to_template("key");
     if !OPTIONS.template.contains(&key_template) {
-        eprintln!("{{key}} has to be defined in template");
+        error!("{{key}} has to be defined in template");
         process::exit(1);
     }
 
@@ -116,6 +121,7 @@ fn main() -> Result<()> {
     Ok(())
 }
 
+#[tracing::instrument(skip(data, pool, value))]
 fn put_parameter(
     data: &HashMap<&str, &str>,
     pool: Pool<SsmConnectionPool>,
@@ -126,7 +132,7 @@ fn put_parameter(
     let normalized_key = format_key(&OPTIONS.template, &key, OPTIONS.uppercase, &data);
     let normalized_value = value.trim();
     if OPTIONS.dry_run {
-        println!(
+        info!(
             "Would import '{}' with value '{}' overwrite: {}",
             normalized_key, normalized_value, OPTIONS.overwrite
         );
@@ -140,9 +146,9 @@ fn put_parameter(
             overwrite: Some(OPTIONS.overwrite),
             ..Default::default()
         };
-        match RUNTIME.block_on(ssm.put_parameter(request)) {
+        match RUNTIME.block_on(ssm.put_parameter(request).compat()) {
             Ok(response) => {
-                println!(
+                info!(
                     "{} set to version {}",
                     normalized_key,
                     response.version.unwrap()
@@ -150,7 +156,7 @@ fn put_parameter(
                 break;
             }
             Err(RusotoError::Service(PutParameterError::ParameterAlreadyExists(_))) => {
-                println!("Ignored {} because it already exists", normalized_key);
+                warn!("Ignored {} because it already exists", normalized_key);
                 break;
             }
             Err(RusotoError::Unknown(ref e))

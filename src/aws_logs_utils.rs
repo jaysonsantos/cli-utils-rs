@@ -5,7 +5,7 @@ use std::io::Read;
 use color_eyre::eyre::{Result, WrapErr};
 use color_eyre::Report;
 use flate2::read::MultiGzDecoder;
-use log::{debug, info, trace};
+use tracing::{debug, info, trace};
 use rusoto_s3::{S3Client, S3};
 use serde::de::DeserializeOwned;
 use structopt::StructOpt;
@@ -89,6 +89,7 @@ where
         .into_deserialize()
 }
 
+#[tracing::instrument]
 pub(crate) fn parse_logs<S>(options: &'static Options) -> Result<()>
 where
     S: Searchable + DeserializeOwned + Debug,
@@ -106,6 +107,7 @@ where
     Ok(())
 }
 
+#[tracing::instrument]
 fn process_log_file<S>(bucket: &str, key: &str, ast: &FilterAst) -> Result<()>
 where
     S: Searchable + DeserializeOwned + Debug,

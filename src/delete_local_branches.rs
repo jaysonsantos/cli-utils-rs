@@ -4,7 +4,7 @@ use std::process;
 use color_eyre::eyre::{Result, WrapErr};
 use env_logger::try_init;
 use git2::{BranchType, Repository};
-use log::{debug, error, info, warn};
+use tracing::{debug, error, info, warn};
 
 fn main() -> Result<()> {
     if var("RUST_LOG").is_err() {

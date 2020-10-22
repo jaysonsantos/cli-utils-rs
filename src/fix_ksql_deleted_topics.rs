@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use color_eyre::eyre::WrapErr;
 use color_eyre::Result;
 use http::header::CONTENT_TYPE;
-use log::trace;
+use tracing::trace;
 use reqwest::header::HeaderMap;
 use reqwest::Url;
 use serde::de::DeserializeOwned;

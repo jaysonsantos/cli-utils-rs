@@ -3,8 +3,8 @@ use std::path::PathBuf;
 
 use color_eyre::eyre::Result;
 use envfile::EnvFile;
-use log::Level::Debug;
-use log::{debug, log_enabled};
+use tokio_compat_02::FutureExt;
+use tracing::{debug, debug_span, info};
 use regex::Regex;
 use rusoto_core::Region;
 use rusoto_ssm::{GetParametersByPathRequest, Ssm, SsmClient};
@@ -59,9 +59,11 @@ async fn main() -> Result<()> {
     Ok(())
 }
 
+#[tracing::instrument(skip(cli))]
 async fn fetch_configs(cli: &SsmClient) -> Result<HashMap<String, String>> {
     let mut output = HashMap::new();
     let mut next_token: Option<String> = None;
+    info!("Fetching keys for path {}", OPTIONS.path);
     loop {
         let request = GetParametersByPathRequest {
             path: OPTIONS.path.clone(),
@@ -69,7 +71,7 @@ async fn fetch_configs(cli: &SsmClient) -> Result<HashMap<String, String>> {
             next_token: next_token.clone(),
             ..Default::default()
         };
-        let response = cli.get_parameters_by_path(request).await?;
+        let response = cli.get_parameters_by_path(request).compat().await?;
         if let Some(parameters) = response.parameters {
             for parameter in parameters {
                 output.insert(parameter.name.unwrap(), parameter.value.unwrap());
@@ -85,6 +87,7 @@ async fn fetch_configs(cli: &SsmClient) -> Result<HashMap<String, String>> {
     Ok(output)
 }
 
+#[tracing::instrument]
 fn transform_key(key: &str, options: &Options) -> String {
     let mut new_key = options
         .search
@@ -96,7 +99,7 @@ fn transform_key(key: &str, options: &Options) -> String {
     if options.uppercase {
         new_key = new_key.to_uppercase();
     }
-    if log_enabled!(Debug) {
+    debug_span!("key result").in_scope(|| {
         debug!(
             "Regex {:?} matches with {:?}? {:?}",
             options.search,
@@ -104,7 +107,7 @@ fn transform_key(key: &str, options: &Options) -> String {
             options.search.is_match(key)
         );
         debug!("Transform key {:?} to {:?}", key, new_key);
-    }
+    });
     new_key
 }
 

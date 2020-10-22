@@ -5,7 +5,7 @@ use std::ops::RangeInclusive;
 use clap::{crate_version, App, Arg};
 use color_eyre::eyre::Result;
 use env_logger::try_init;
-use log::{debug, trace};
+use tracing::{debug, trace};
 
 use crate::utils::{Range, LINE_ENDING};
 
