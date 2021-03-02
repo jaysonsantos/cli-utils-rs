@@ -4,13 +4,13 @@ use std::fmt::Debug;
 use color_eyre::eyre::WrapErr;
 use color_eyre::Result;
 use http::header::CONTENT_TYPE;
-use log::trace;
 use reqwest::header::HeaderMap;
 use reqwest::Url;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tokio_compat_02::FutureExt;
+
+use log::trace;
 
 struct Client {
     client: reqwest::Client,
@@ -45,7 +45,6 @@ impl Client {
             .post(self.base_url.clone())
             .json(&Query::with_statement(statement))
             .send()
-            .compat()
             .await?;
 
         let json_response = response.json().await.wrap_err("failed to run query");

@@ -1,33 +1,36 @@
-use color_eyre::eyre::eyre;
-use color_eyre::Result;
 use rusoto_s3::{S3Client, S3};
-use tokio_compat_02::FutureExt;
 
-use crate::aws_logs_utils::S3_CLIENT;
-use crate::RUNTIME;
+use crate::error::{Error, Result};
+
+mod error;
 
 pub struct BucketKeyIterator<'a> {
     bucket: &'a str,
     prefix: Option<&'a str>,
-    cli: &'static S3Client,
+    cli: &'a S3Client,
     continuation_token: Option<String>,
     keys: Vec<String>,
     empty: bool,
 }
 
 impl<'a> BucketKeyIterator<'a> {
-    pub fn new(bucket: &'a str, prefix: Option<&'a str>) -> BucketKeyIterator<'a> {
+    pub fn new(
+        bucket: &'a str,
+        prefix: Option<&'a str>,
+        cli: &'a S3Client,
+    ) -> BucketKeyIterator<'a> {
         BucketKeyIterator {
             bucket,
             prefix,
-            cli: &S3_CLIENT,
+            cli,
             continuation_token: None,
             keys: vec![],
             empty: false,
         }
     }
 
-    fn iter_next(&mut self) -> Result<Option<String>> {
+    pub async fn iter_next(&mut self) -> Result<Option<String>> {
+        // TODO: Use streams to implement the old iterator
         if let Some(key) = self.keys.pop() {
             return Ok(Some(key));
         }
@@ -43,7 +46,11 @@ impl<'a> BucketKeyIterator<'a> {
             ..Default::default()
         };
 
-        let response = RUNTIME.block_on(self.cli.list_objects_v2(request).compat())?;
+        let response = self
+            .cli
+            .list_objects_v2(request)
+            .await
+            .map_err(|e| eyre::eyre!(e))?;
         if let Some(keys) = response.contents {
             let mut output_keys = vec![];
             for key in keys.iter().filter(|object| match object.key {
@@ -52,10 +59,7 @@ impl<'a> BucketKeyIterator<'a> {
                 }
                 None => false,
             }) {
-                let key = key
-                    .key
-                    .as_ref()
-                    .ok_or_else(|| eyre!("Key was not present"))?;
+                let key = key.key.as_ref().ok_or(Error::KeyNotPresent)?;
                 output_keys.push(key.clone());
             }
 
@@ -67,16 +71,5 @@ impl<'a> BucketKeyIterator<'a> {
         }
 
         Ok(None)
-    }
-}
-
-impl<'a> Iterator for BucketKeyIterator<'a> {
-    type Item = Result<String>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        match self.iter_next() {
-            Ok(res) => res.map(Ok),
-            Err(err) => Some(Err(err)),
-        }
     }
 }
