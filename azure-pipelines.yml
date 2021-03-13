@@ -1,7 +1,7 @@
 # Taken from https://github.com/cloudflare/wrangler/blob/master/azure-pipelines.yml
 trigger:
-- master
-- refs/tags/*
+  - master
+  - refs/tags/*
 
 jobs:
   - job: test_lint
@@ -37,9 +37,7 @@ jobs:
     displayName: "Dist Linux binary"
     steps:
       - template: ci/azure-install-rust.yml
-      - script: |
-          set -ex
-          cargo install --path=. --root=installed
+      - script: ./ci/install.sh
       - template: ci/azure-collect-binaries.yml
         parameters:
           name: dist_linux
@@ -50,7 +48,7 @@ jobs:
       vmImage: macOS-10.14
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo install --path=. --root=installed
+      - script: ./ci/install.sh
         env:
           MACOSX_DEPLOYMENT_TARGET: 10.7
       - template: ci/azure-collect-binaries.yml
@@ -63,7 +61,7 @@ jobs:
       vmImage: vs2017-win2016
     steps:
       - template: ci/azure-install-rust.yml
-      - script: cargo install --path=. --root=installed
+      - bash: ./ci/install.sh
         env:
           RUSTFLAGS: -Ctarget-feature=+crt-static
       - template: ci/azure-collect-binaries.yml

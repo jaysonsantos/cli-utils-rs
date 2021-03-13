@@ -4,7 +4,7 @@ use color_eyre::{Report, Result};
 use serde::Deserialize;
 use wirefilter::{ExecutionContext, Scheme};
 
-pub(crate) trait Searchable {
+pub trait Searchable {
     fn scheme() -> &'static Scheme;
     fn execution_context(&self) -> Result<ExecutionContext>;
 }
@@ -73,7 +73,7 @@ pub(crate) trait Searchable {
 //}
 
 #[derive(Debug, Deserialize)]
-pub(crate) struct FlowLogLine {
+pub struct FlowLogLine {
     pub version: String,
     #[serde(alias = "account-id")]
     pub account_id: String,

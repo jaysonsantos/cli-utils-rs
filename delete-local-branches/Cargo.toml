@@ -1,0 +1,11 @@
+[package]
+name = "delete-local-branches"
+version = "0.2.1"
+authors = ["Jayson Reis <santosdosreis@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+color-eyre = "0.5.6"
+env_logger = "0.8.1"
+git2 = "0.13.6"
+log = "0.4.6"

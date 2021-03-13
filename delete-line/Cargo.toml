@@ -1,0 +1,11 @@
+[package]
+name = "delete-line"
+version = "0.2.1"
+authors = ["Jayson Reis <santosdosreis@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+clap = "2.32.0"
+color-eyre = "0.5.6"
+env_logger = "0.8.1"
+log = "0.4.6"

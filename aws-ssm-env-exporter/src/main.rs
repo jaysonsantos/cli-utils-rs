@@ -9,7 +9,7 @@ use regex::Regex;
 use rusoto_core::Region;
 use rusoto_ssm::{GetParametersByPathRequest, Ssm, SsmClient};
 use structopt::StructOpt;
-use tokio::fs::File;
+use tokio::{fs::File, spawn};
 
 #[derive(Debug, StructOpt)]
 struct Options {
@@ -47,7 +47,7 @@ async fn main() -> Result<()> {
     let file = File::create(&OPTIONS.env_file).await?;
     drop(file);
 
-    let mut env = EnvFile::new(&OPTIONS.env_file)?;
+    let mut env = spawn(async { EnvFile::new(&OPTIONS.env_file) }).await??;
 
     let cli = SsmClient::new(OPTIONS.get_region());
     let configs = fetch_configs(&cli).await?;
@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
         let key = transform_key(&key, &OPTIONS);
         env.update(&key, &value);
     }
-    env.write()?;
+    spawn(async move { env.write() }).await??;
     Ok(())
 }
 
