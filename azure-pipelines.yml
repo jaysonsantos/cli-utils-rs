@@ -18,7 +18,7 @@ jobs:
   - job: test_lint_windows
     displayName: "Run tests (Windows)"
     pool:
-      vmImage: vs2017-win2016
+      vmImage: windows-latest
     steps:
       - template: ci/azure-install-rust.yml
       - script: cargo test --locked
@@ -45,7 +45,7 @@ jobs:
   - job: dist_darwin
     displayName: "Dist Darwin binary"
     pool:
-      vmImage: macOS-10.14
+      vmImage: macOS-latest
     steps:
       - template: ci/azure-install-rust.yml
       - script: ./ci/install.sh
@@ -58,7 +58,7 @@ jobs:
   - job: dist_windows
     displayName: "Dist Windows binary"
     pool:
-      vmImage: vs2017-win2016
+      vmImage: windows-latest
     steps:
       - template: ci/azure-install-rust.yml
       - bash: ./ci/install.sh
@@ -122,7 +122,7 @@ jobs:
           targetPath: gh-release
       - task: GithubRelease@0
         condition: and(succeeded(), startsWith(variables['Build.SourceBranch'], 'refs/tags/'))
-        displayName: 'Create GitHub Release'
+        displayName: "Create GitHub Release"
         inputs:
           gitHubConnection: github-token
           repositoryName: jaysonsantos/cli-utils-rs
