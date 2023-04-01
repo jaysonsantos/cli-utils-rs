@@ -6,6 +6,8 @@ trigger:
 jobs:
   - job: test_lint
     displayName: "Run tests, fmt, and clippy"
+    pool:
+      vmImage: ubuntu-latest
     steps:
       - template: ci/azure-install-rust.yml
       - script: cargo test --locked
@@ -26,6 +28,8 @@ jobs:
 
   - job: test_lint_nightly
     displayName: "Run tests (nightly)"
+    pool:
+      vmImage: ubuntu-latest
     steps:
       - template: ci/azure-install-rust.yml
         parameters:
@@ -35,6 +39,8 @@ jobs:
 
   - job: dist_linux
     displayName: "Dist Linux binary"
+    pool:
+      vmImage: ubuntu-latest
     steps:
       - template: ci/azure-install-rust.yml
       - script: ./ci/install.sh
@@ -74,6 +80,8 @@ jobs:
       - dist_darwin
       - dist_windows
     displayName: "Deploy release binaries"
+    pool:
+      vmImage: ubuntu-latest
     steps:
       - task: DownloadPipelineArtifact@0
         displayName: "Download dist - windows"
