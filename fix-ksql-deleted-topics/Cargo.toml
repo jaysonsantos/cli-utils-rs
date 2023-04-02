@@ -7,7 +7,7 @@ edition = "2018"
 [dependencies]
 color-eyre = "0.6.2"
 env_logger = "0.10.0"
-http = "0.2.1"
+http = "0.2.9"
 log = "0.4.6"
 regex = "1.4.1"
 reqwest = { version = "0.11.1", features = ["json"] }
