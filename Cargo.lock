@@ -127,7 +127,7 @@ version = "0.2.1"
 dependencies = [
  "aws-logs-utils",
  "color-eyre",
- "env_logger 0.10.0",
+ "env_logger",
  "lazy_static",
  "rusoto_core",
  "rusoto_s3",
@@ -149,7 +149,6 @@ dependencies = [
  "log",
  "rusoto_s3",
  "serde",
- "structopt",
  "wirefilter-engine",
 ]
 
@@ -169,7 +168,7 @@ name = "aws-ssm-env-exporter"
 version = "0.2.1"
 dependencies = [
  "color-eyre",
- "env_logger 0.10.0",
+ "env_logger",
  "envfile",
  "lazy_static",
  "log",
@@ -185,13 +184,11 @@ name = "aws-ssm-env-importer"
 version = "0.2.1"
 dependencies = [
  "color-eyre",
- "env_logger 0.8.4",
  "envfile",
  "lazy_static",
  "log",
  "r2d2",
  "rayon",
- "regex",
  "rusoto_core",
  "rusoto_ssm",
  "structopt",
@@ -569,7 +566,7 @@ version = "0.2.1"
 dependencies = [
  "clap 4.2.1",
  "color-eyre",
- "env_logger 0.10.0",
+ "env_logger",
  "log",
 ]
 
@@ -578,7 +575,7 @@ name = "delete-local-branches"
 version = "0.2.1"
 dependencies = [
  "color-eyre",
- "env_logger 0.10.0",
+ "env_logger",
  "git2",
  "log",
 ]
@@ -626,19 +623,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "071a31f4ee85403370b58aca746f01041ede6f0da2730960ad001edc2b71b394"
 dependencies = [
  "cfg-if 1.0.0",
-]
-
-[[package]]
-name = "env_logger"
-version = "0.8.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a19187fea3ac7e84da7dacf48de0c45d63c6a76f9490dae389aead16c243fce3"
-dependencies = [
- "atty",
- "humantime",
- "log",
- "regex",
- "termcolor",
 ]
 
 [[package]]
@@ -730,7 +714,7 @@ name = "fix-ksql-deleted-topics"
 version = "0.2.1"
 dependencies = [
  "color-eyre",
- "env_logger 0.10.0",
+ "env_logger",
  "http",
  "log",
  "regex",
