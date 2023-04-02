@@ -14,4 +14,4 @@ regex = "1.4.1"
 rusoto_core = "0.48.0"
 rusoto_ssm = "0.48.0"
 structopt = "0.3.26"
-tokio = { version = "1.2.0", features = ["rt-multi-thread", "macros", "fs"] }
+tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "fs"] }
