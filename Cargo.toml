@@ -7,4 +7,5 @@ members = [
     "aws-ssm-env-exporter",
     "fix-ksql-deleted-topics",
     "aws-logs-utils",
+    "uuid-gen",
 ]
