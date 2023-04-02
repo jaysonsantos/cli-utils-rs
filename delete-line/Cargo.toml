@@ -8,4 +8,4 @@ edition = "2018"
 clap = { version = "4.2.1", features = ["derive"] }
 color-eyre = "0.6.2"
 env_logger = "0.10.0"
-log = "0.4.6"
+log = "0.4.17"
