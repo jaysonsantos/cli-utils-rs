@@ -18,6 +18,7 @@ pub static LINE_ENDING: &[u8; 1] = b"\n";
 /// let r = "1-10".parse::<Range>().unwrap().into_inner();
 /// assert_eq!(r, (1..=10));
 /// ```
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Range(RangeInclusive<usize>);
 
 impl Range {
