@@ -10,8 +10,8 @@ envfile = "0.2.1"
 lazy_static = "1.4.0"
 log = "0.4.20"
 r2d2 = "0.8.10"
-rayon = "1.7.0"
+rayon = "1.8.0"
 rusoto_core = "0.48.0"
 rusoto_ssm = "0.48.0"
 structopt = "0.3.26"
-tokio = { version = "1.32.0", features = ["rt-multi-thread", "macros", "fs"] }
+tokio = { version = "1.34.0", features = ["rt-multi-thread", "macros", "fs"] }
