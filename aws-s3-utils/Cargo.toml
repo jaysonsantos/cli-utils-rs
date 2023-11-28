@@ -5,8 +5,8 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-eyre = "0.6.8"
-futures = "0.3.28"
+eyre = "0.6.9"
+futures = "0.3.29"
 rusoto_core = "0.48.0"
 rusoto_s3 = "0.48.0"
-thiserror = "1.0.47"
+thiserror = "1.0.50"
