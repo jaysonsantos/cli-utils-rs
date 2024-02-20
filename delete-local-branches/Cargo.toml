@@ -6,6 +6,6 @@ edition = "2018"
 
 [dependencies]
 color-eyre = "0.6.2"
-env_logger = "0.10.1"
-git2 = "0.18.1"
+env_logger = "0.11.2"
+git2 = "0.18.2"
 log = "0.4.20"
