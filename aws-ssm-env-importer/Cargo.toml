@@ -5,12 +5,12 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-color-eyre = "0.6.2"
+color-eyre = "0.6.3"
 envfile = "0.2.1"
 lazy_static = "1.4.0"
-log = "0.4.20"
+log = "0.4.21"
 r2d2 = "0.8.10"
-rayon = "1.8.1"
+rayon = "1.10.0"
 rusoto_core = "0.48.0"
 rusoto_ssm = "0.48.0"
 structopt = "0.3.26"
