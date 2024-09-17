@@ -2,7 +2,7 @@
 set -ex
 set -o pipefail
 
-BINS="delete-line delete-local-branches aws-flow-logs aws-ssm-env-importer aws-ssm-env-exporter fix-ksql-deleted-topics"
+BINS="delete-line delete-local-branches aws-flow-logs aws-ssm-env-importer aws-ssm-env-exporter"
 
 for bin in $BINS; do
   cargo install --path="$bin" --root=installed
