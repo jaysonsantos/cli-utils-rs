@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+use clap::Parser;
 use color_eyre::eyre::Result;
 use envfile::EnvFile;
 use log::Level::Debug;
@@ -8,24 +9,23 @@ use log::{debug, log_enabled};
 use regex::Regex;
 use rusoto_core::Region;
 use rusoto_ssm::{GetParametersByPathRequest, Ssm, SsmClient};
-use structopt::StructOpt;
 use tokio::{fs::File, spawn};
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, Parser)]
 struct Options {
-    #[structopt(short = "f", long = "env-file")]
+    #[arg(short = 'f', long = "env-file")]
     env_file: PathBuf,
-    #[structopt(short = "r", long)]
+    #[arg(short = 'r', long)]
     region: Option<Region>,
-    #[structopt(short = "p", long)]
+    #[arg(short = 'p', long)]
     path: String,
-    #[structopt(short = "e", long)]
+    #[arg(short = 'e', long)]
     search: Regex,
-    #[structopt(short = "t", long)]
+    #[arg(short = 't', long)]
     replace: String,
-    #[structopt(short = "u", long)]
+    #[arg(short = 'u', long)]
     uppercase: bool,
-    #[structopt(short = "l", long)]
+    #[arg(short = 'l', long)]
     lowercase: bool,
 }
 
@@ -36,7 +36,7 @@ impl Options {
 }
 
 lazy_static::lazy_static! {
-    pub (crate) static ref OPTIONS: Options = Options::from_args();
+    pub (crate) static ref OPTIONS: Options = Options::parse();
 }
 
 #[tokio::main]

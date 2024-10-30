@@ -6,6 +6,7 @@ use std::str::FromStr;
 use std::thread;
 use std::time::Duration;
 
+use clap::Parser as ClapParser;
 use color_eyre::eyre::{Result, WrapErr};
 use envfile::EnvFile;
 use r2d2::Pool;
@@ -13,7 +14,6 @@ use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use rusoto_core::{Region, RusotoError};
 use rusoto_ssm::{PutParameterError, PutParameterRequest, Ssm, SsmClient as RusotoSsmClient};
-use structopt::StructOpt;
 use tokio::runtime::{Builder, Runtime};
 
 const MAXIMUM_SSM_CLIENTS: u32 = 4;
@@ -29,24 +29,24 @@ impl Display for DumbError {
 
 impl std::error::Error for DumbError {}
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, ClapParser)]
 struct Options {
-    #[structopt(short = "f", long = "env-file")]
+    #[arg(short = 'f', long = "env-file")]
     env_file: PathBuf,
-    #[structopt(short = "r", long = "region")]
+    #[arg(short = 'r', long = "region")]
     region: String,
-    #[structopt(short = "e", long = "environment")]
+    #[arg(short = 'e', long = "environment")]
     environment: String,
-    #[structopt(short = "a", long = "app-name")]
+    #[arg(short = 'a', long = "app-name")]
     app_name: String,
-    #[structopt(short = "t", long = "template")]
+    #[arg(short = 't', long = "template")]
     /// Template to generate the key on SSM side, example "/{environment}/{app_name}/{key}"
     template: String,
-    #[structopt(short = "o", long = "overwrite")]
+    #[arg(short = 'o', long = "overwrite")]
     overwrite: bool,
-    #[structopt(short = "u", long = "uppercase")]
+    #[arg(short = 'u', long = "uppercase")]
     uppercase: bool,
-    #[structopt(short = "d", long = "dry-run")]
+    #[arg(short = 'd', long = "dry-run")]
     dry_run: bool,
 }
 
@@ -70,7 +70,7 @@ impl r2d2::ManageConnection for SsmConnectionPool {
 }
 
 lazy_static::lazy_static! {
-    pub (crate) static ref OPTIONS: Options = Options::from_args();
+    pub (crate) static ref OPTIONS: Options = Options::parse();
     static ref RUNTIME: Runtime = Builder::new_multi_thread().enable_all().build().unwrap();
 }
 

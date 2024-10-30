@@ -1,12 +1,12 @@
+use clap::Parser as ClapParser;
 use color_eyre::eyre::{Result, WrapErr};
 use rusoto_core::Region;
 use rusoto_s3::S3Client;
-use structopt::StructOpt;
 
 use aws_logs_utils::log_types::FlowLogLine;
 use aws_logs_utils::Parser;
 
-#[derive(Debug, StructOpt)]
+#[derive(Debug, ClapParser)]
 pub struct Options {
     pub region: String,
     pub bucket: String,
@@ -15,7 +15,7 @@ pub struct Options {
 }
 
 lazy_static::lazy_static! {
-    pub (crate) static ref OPTIONS: Options = Options::from_args();
+    pub (crate) static ref OPTIONS: Options = Options::parse();
 }
 
 #[tokio::main]
