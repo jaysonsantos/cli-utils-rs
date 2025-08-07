@@ -113,7 +113,7 @@ lazy_static::lazy_static! {
 
 impl Searchable for FlowLogLine {
     fn scheme() -> &'static Scheme {
-        &*FLOW_SCHEME
+        &FLOW_SCHEME
     }
 
     fn execution_context(&self) -> Result<ExecutionContext> {
