@@ -31,7 +31,7 @@ struct Options {
 
 impl Options {
     pub fn get_region(&self) -> Region {
-        self.region.clone().unwrap_or_else(Region::default)
+        self.region.clone().unwrap_or_default()
     }
 }
 
@@ -103,7 +103,7 @@ fn transform_key(key: &str, options: &Options) -> String {
             key,
             options.search.is_match(key)
         );
-        debug!("Transform key {:?} to {:?}", key, new_key);
+        debug!("Transform key {key:?} to {new_key:?}");
     }
     new_key
 }

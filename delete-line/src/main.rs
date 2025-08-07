@@ -57,10 +57,10 @@ where
     for (line_number, line) in BufReader::new(input).lines().enumerate() {
         let line_to_skip = line_number + 1;
         if lines_to_skip.contains(&line_to_skip) {
-            debug!("Skipping {}", line_to_skip);
+            debug!("Skipping {line_to_skip}");
             continue;
         }
-        trace!("Including {}", line_to_skip);
+        trace!("Including {line_to_skip}");
         output.write_all(line?.as_bytes())?;
         output.write_all(&LINE_ENDING[..])?;
     }
@@ -77,7 +77,7 @@ mod tests {
     #[test]
     fn test_skip_lines() {
         let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
-        let input = vec!["1", "2", "3"].join(&line_ending);
+        let input = ["1", "2", "3"].join(&line_ending);
         let output = vec![];
         let mut output_cursor = Cursor::new(output);
 
@@ -86,7 +86,7 @@ mod tests {
         let output = String::from_utf8(output_cursor.into_inner()).unwrap();
 
         assert_eq!(
-            format!("{}{}", vec!["1", "3"].join(&line_ending), line_ending),
+            format!("{}{}", ["1", "3"].join(&line_ending), line_ending),
             output
         );
     }
@@ -94,7 +94,7 @@ mod tests {
     #[test]
     fn test_skip_initial_lines() {
         let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
-        let input = vec!["1", "2", "3"].join(&line_ending);
+        let input = ["1", "2", "3"].join(&line_ending);
         let output = vec![];
         let mut output_cursor = Cursor::new(output);
 
@@ -103,7 +103,7 @@ mod tests {
         let output = String::from_utf8(output_cursor.into_inner()).unwrap();
 
         assert_eq!(
-            format!("{}{}", vec!["3"].join(&line_ending), line_ending),
+            format!("{}{}", ["3"].join(&line_ending), line_ending),
             output
         );
     }
@@ -111,7 +111,7 @@ mod tests {
     #[test]
     fn test_skip_final_lines() {
         let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
-        let input = vec!["1", "2", "3"].join(&line_ending);
+        let input = ["1", "2", "3"].join(&line_ending);
         let output = vec![];
         let mut output_cursor = Cursor::new(output);
 
@@ -120,7 +120,7 @@ mod tests {
         let output = String::from_utf8(output_cursor.into_inner()).unwrap();
 
         assert_eq!(
-            format!("{}{}", vec!["1"].join(&line_ending), line_ending),
+            format!("{}{}", ["1"].join(&line_ending), line_ending),
             output
         );
     }
@@ -128,7 +128,7 @@ mod tests {
     #[test]
     fn test_skip_last_line() {
         let line_ending = String::from_utf8(LINE_ENDING.to_vec()).unwrap();
-        let input = vec!["1", "2", "3"].join(&line_ending);
+        let input = ["1", "2", "3"].join(&line_ending);
         let output = vec![];
         let mut output_cursor = Cursor::new(output);
 
@@ -137,7 +137,7 @@ mod tests {
         let output = String::from_utf8(output_cursor.into_inner()).unwrap();
 
         assert_eq!(
-            format!("{}{}", vec!["1", "2"].join(&line_ending), line_ending),
+            format!("{}{}", ["1", "2"].join(&line_ending), line_ending),
             output
         );
     }

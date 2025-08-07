@@ -33,7 +33,7 @@ impl FromStr for Range {
     fn from_str(data: &str) -> Result<Range, Self::Err> {
         if data.contains('-') {
             let parts: Result<Vec<usize>, _> = data.split('-').take(2).map(str::parse).collect();
-            let parts = parts.wrap_err(format!("Invalid range format {:?}", data))?;
+            let parts = parts.wrap_err(format!("Invalid range format {data:?}"))?;
             if parts.len() != 2 {
                 return Err(eyre!(format!("Invalid line length range {}", data)));
             }

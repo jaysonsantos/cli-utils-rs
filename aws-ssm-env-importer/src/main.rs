@@ -23,7 +23,7 @@ struct DumbError;
 
 impl Display for DumbError {
     fn fmt(&self, f: &mut Formatter) -> Result<(), fmt::Error> {
-        Ok(f.write_str("Error")?)
+        f.write_str("Error")
     }
 }
 
@@ -64,8 +64,8 @@ impl r2d2::ManageConnection for SsmConnectionPool {
         Ok(())
     }
 
-    fn has_broken(&self, mut conn: &mut Self::Connection) -> bool {
-        self.is_valid(&mut conn).is_err()
+    fn has_broken(&self, conn: &mut Self::Connection) -> bool {
+        self.is_valid(conn).is_err()
     }
 }
 
@@ -75,7 +75,7 @@ lazy_static::lazy_static! {
 }
 
 fn to_template(var: &str) -> String {
-    format!("{{{}}}", var)
+    format!("{{{var}}}")
 }
 
 fn format_key(template: &str, key: &str, uppercase: bool, data: &HashMap<&str, &str>) -> String {
@@ -111,7 +111,7 @@ fn main() -> Result<()> {
 
     env.store
         .par_iter()
-        .for_each(move |(key, value)| put_parameter(&data, pool.clone(), &key, value));
+        .for_each(move |(key, value)| put_parameter(&data, pool.clone(), key, value));
 
     Ok(())
 }
@@ -123,7 +123,7 @@ fn put_parameter(
     value: &str,
 ) {
     let ssm = pool.get().unwrap();
-    let normalized_key = format_key(&OPTIONS.template, &key, OPTIONS.uppercase, &data);
+    let normalized_key = format_key(&OPTIONS.template, key, OPTIONS.uppercase, data);
     let normalized_value = value.trim();
     if OPTIONS.dry_run {
         println!(
@@ -150,7 +150,7 @@ fn put_parameter(
                 break;
             }
             Err(RusotoError::Service(PutParameterError::ParameterAlreadyExists(_))) => {
-                println!("Ignored {} because it already exists", normalized_key);
+                println!("Ignored {normalized_key} because it already exists");
                 break;
             }
             Err(RusotoError::Unknown(ref e))
@@ -162,8 +162,7 @@ fn put_parameter(
                 error
                     .wrap_err_with(|| {
                         format!(
-                            "Unexpected error while trying to put key = {:?} and value = {:?}",
-                            normalized_key, normalized_value
+                            "Unexpected error while trying to put key = {normalized_key:?} and value = {normalized_value:?}"
                         )
                     })
                     .unwrap();

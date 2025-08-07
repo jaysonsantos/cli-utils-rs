@@ -68,14 +68,14 @@ impl<'a> Parser<'a> {
         S: Searchable + DeserializeOwned + Debug,
     {
         let data = self.process_s3_file::<S>(key, true);
-        debug!("Processing {}", key);
+        debug!("Processing {key}");
 
         if let Some(lines) = data {
             for line in lines? {
                 let line = match line {
                     Ok(line) => line,
                     Err(e) => {
-                        debug!("Skipping line because of {:?}", e);
+                        debug!("Skipping line because of {e:?}");
                         continue;
                     }
                 };
@@ -154,9 +154,9 @@ impl<'a> Parser<'a> {
             .execution_context()
             .wrap_err("error building execution context")?;
         if filter.execute(&ctx).map_err(Report::msg)? {
-            println!("Matched with {:#?}", line);
+            println!("Matched with {line:#?}");
         } else {
-            trace!("NOT Matched with {:#?}", line);
+            trace!("NOT Matched with {line:#?}");
         }
         Ok(())
     }

@@ -38,7 +38,7 @@ fn fetch_new_data(repository: &Repository) -> Result<()> {
     info!("Fetching repository data.");
     let child = process::Command::new("git")
         .current_dir(repository.path())
-        .args(&["fetch", "-p"])
+        .args(["fetch", "-p"])
         .output()
         .wrap_err("Error fetching repository data")?;
 
@@ -46,13 +46,11 @@ fn fetch_new_data(repository: &Repository) -> Result<()> {
     let stderr_return = String::from_utf8_lossy(&child.stderr);
     if child.status.success() {
         debug!(
-            "Process return\nSTDOUT: {:?}\nSTDERR: {:?}",
-            stdout_return, stderr_return
+            "Process return\nSTDOUT: {stdout_return:?}\nSTDERR: {stderr_return:?}"
         );
     } else {
         warn!(
-            "Error running git fetch\nProcess return\nSTDOUT: {:?}\nSTDERR: {:?}",
-            stdout_return, stderr_return
+            "Error running git fetch\nProcess return\nSTDOUT: {stdout_return:?}\nSTDERR: {stderr_return:?}"
         );
     }
 

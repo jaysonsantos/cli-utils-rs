@@ -5,13 +5,13 @@ authors = ["Jayson Reis <santosdosreis@gmail.com>"]
 edition = "2018"
 
 [dependencies]
-clap = { version = "4.5.20", features = ["derive", "env"] }
-color-eyre = "0.6.2"
-env_logger = "0.11.2"
+clap = { version = "4.5.43", features = ["derive", "env"] }
+color-eyre = "0.6.5"
+env_logger = "0.11.8"
 envfile = "0.2.1"
-lazy_static = "1.4.0"
-log = "0.4.20"
-regex = "1.10.3"
+lazy_static = "1.5.0"
+log = "0.4.27"
+regex = "1.11.1"
 rusoto_core = "0.48.0"
 rusoto_ssm = "0.48.0"
-tokio = { version = "1.41.0", features = ["rt-multi-thread", "macros", "fs"] }
+tokio = { version = "1.47.1", features = ["rt-multi-thread", "macros", "fs"] }
